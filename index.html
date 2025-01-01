@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Two-Parameter Beta-like Function</title>
+  <!-- Load Plotly.js from CDN -->
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+  <style>
+    body {
+      font-family: sans-serif;
+      margin: 20px;
+    }
+    .slider-container {
+      margin-bottom: 20px;
+    }
+    .slider-label {
+      display: inline-block;
+      width: 80px;
+    }
+  </style>
+</head>
+<body>
+
+<h1>Interactive Two-Parameter Beta-like Function</h1>
+
+<div class="slider-container">
+  <label class="slider-label" for="alphaSlider">Alpha:</label>
+  <input type="range" id="alphaSlider" min="0.01" max="0.99" step="0.01" value="0.5">
+  <span id="alphaValue">0.5</span>
+</div>
+
+<div class="slider-container">
+  <label class="slider-label" for="lambdaSlider">Lambda:</label>
+  <input type="range" id="lambdaSlider" min="0.1" max="100" step="0.1" value="5">
+  <span id="lambdaValue">5</span>
+</div>
+
+<div id="plot" style="width: 800px; height: 500px;"></div>
+
+<script>
+// ----------------------------------------------------
+// 1) Define the two-parameter Beta-like function
+// ----------------------------------------------------
+function twoParamBetaLike(x, alpha, lam) {
+  // f(x) = [x^(alpha*lam)*(1-x)^((1-alpha)*lam)] / [alpha^(alpha*lam)*(1-alpha)^((1-alpha)*lam)]
+  const numerator = Math.pow(x, alpha * lam) * Math.pow((1 - x), (1 - alpha) * lam);
+  const denominator = Math.pow(alpha, alpha * lam) * Math.pow((1 - alpha), (1 - alpha) * lam);
+  return numerator / denominator;
+}
+
+// ----------------------------------------------------
+// 2) Generate data points given alpha, lambda
+// ----------------------------------------------------
+function generateData(alpha, lambda, n=200) {
+  const xValues = [];
+  const yValues = [];
+  
+  for (let i = 0; i <= n; i++) {
+    const x = i / n; // from 0 to 1
+    xValues.push(x);
+    yValues.push(twoParamBetaLike(x, alpha, lambda));
+  }
+  
+  return { x: xValues, y: yValues };
+}
+
+// ----------------------------------------------------
+// 3) Plot with Plotly
+// ----------------------------------------------------
+function plotFunction(alpha, lambda) {
+  const dataPoints = generateData(alpha, lambda);
+
+  const trace = {
+    x: dataPoints.x,
+    y: dataPoints.y,
+    mode: 'lines',
+    type: 'scatter',
+    name: `alpha=${alpha}, lambda=${lambda}`
+  };
+
+  const layout = {
+    title: 'Two-Parameter Beta-like Function',
+    xaxis: { title: 'x', range: [0, 1] },
+    yaxis: { title: 'f(x)', range: [0, 1.1] }
+  };
+
+  Plotly.newPlot('plot', [trace], layout);
+}
+
+// ----------------------------------------------------
+// 4) Initialize + Add event listeners
+// ----------------------------------------------------
+window.addEventListener('DOMContentLoaded', () => {
+  const alphaSlider = document.getElementById('alphaSlider');
+  const lambdaSlider = document.getElementById('lambdaSlider');
+  const alphaValue = document.getElementById('alphaValue');
+  const lambdaValue = document.getElementById('lambdaValue');
+
+  function updatePlot() {
+    const alpha = parseFloat(alphaSlider.value);
+    const lam = parseFloat(lambdaSlider.value);
+    alphaValue.textContent = alpha.toFixed(2);
+    lambdaValue.textContent = lam.toFixed(2);
+    plotFunction(alpha, lam);
+  }
+
+  // On page load, plot initial
+  updatePlot();
+
+  // When sliders change, update plot
+  alphaSlider.addEventListener('input', updatePlot);
+  lambdaSlider.addEventListener('input', updatePlot);
+});
+</script>
+
+</body>
+</html>
